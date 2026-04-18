@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { ImageIcon, Maximize2, MoveHorizontal, MoveVertical, ScanSearch, Sparkles } from "lucide-react";
 
 export default function ProductPreview({
   product,
@@ -25,26 +26,56 @@ export default function ProductPreview({
           height: `${(area.height / imageHeight) * 100}%`,
         }
       : null;
+  const controlItems = [
+    {
+      label: "Zoom",
+      value: `${controls.zoom.toFixed(2)}x`,
+      icon: Maximize2,
+      input: <input type="range" min="0.5" max="2" step="0.05" value={controls.zoom} onChange={(e) => onZoomChange(Number(e.target.value))} className="range-input mt-4 w-full" />,
+    },
+    {
+      label: "Horizontal Position",
+      value: `${controls.offsetX}px`,
+      icon: MoveHorizontal,
+      input: <input type="range" min="-180" max="180" step="1" value={controls.offsetX} onChange={(e) => onXChange(Number(e.target.value))} className="range-input mt-4 w-full" />,
+    },
+    {
+      label: "Vertical Position",
+      value: `${controls.offsetY}px`,
+      icon: MoveVertical,
+      input: <input type="range" min="-180" max="180" step="1" value={controls.offsetY} onChange={(e) => onYChange(Number(e.target.value))} className="range-input mt-4 w-full" />,
+    },
+    {
+      label: "Print Size",
+      value: `${controls.printSize}%`,
+      icon: ScanSearch,
+      input: <input type="range" min="40" max="160" step="1" value={controls.printSize} onChange={(e) => onSizeChange(Number(e.target.value))} className="range-input mt-4 w-full" />,
+    },
+  ];
 
   return (
-    <section className="glass-panel flex min-h-[560px] flex-col rounded-[32px] p-6">
-      <div className="mb-6 flex items-start justify-between gap-4">
+    <section className="glass-panel flex min-h-[420px] flex-col rounded-[28px] p-4 sm:min-h-[560px] sm:rounded-[32px] sm:p-6">
+      <div className="mb-5 flex flex-col gap-4 sm:mb-6 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="text-sm uppercase tracking-[0.3em] text-slate-500">Preview Studio</p>
-          <h2 className="mt-2 text-3xl font-semibold text-slate-50">{product?.name ?? "Select a product"}</h2>
-          <p className="mt-2 max-w-2xl text-sm text-slate-400">
-            Build production-ready placement previews with live sizing, repositioning, and asynchronous fabric rendering.
+          <div className="mb-3 flex items-center gap-2">
+            <span className="panel-eyebrow">Step 1 View And Adjust</span>
+            {view?.name ? <span className="status-pill rounded-full px-2.5 py-1 text-[11px] uppercase tracking-[0.22em]">{view.name}</span> : null}
+          </div>
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-50 sm:text-3xl">{product?.name ?? "Select a product"}</h2>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
+            Fine-tune placement with live controls, then render the final mockup without leaving the workspace.
           </p>
         </div>
         {isRendering && (
-          <div className="rounded-full border border-blue-400/20 bg-blue-500/10 px-4 py-2 text-sm text-blue-200">
+          <div className="status-pill flex items-center gap-2 rounded-full px-4 py-2 text-sm text-sky-100">
+            <Sparkles size={15} className="text-sky-300" />
             Rendering in progress
           </div>
         )}
       </div>
 
-      <div className="relative flex flex-1 items-center justify-center overflow-hidden rounded-[28px] border border-white/5 bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.18),_transparent_30%),linear-gradient(180deg,_rgba(15,23,42,0.95),_rgba(2,6,23,0.95))] p-8">
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:48px_48px] opacity-40" />
+      <div className="relative flex flex-1 items-center justify-center overflow-hidden rounded-[24px] border border-white/5 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.16),_transparent_28%),linear-gradient(180deg,_rgba(8,15,29,0.98),_rgba(3,8,20,0.98))] p-4 sm:rounded-[28px] sm:p-8">
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.018)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.018)_1px,transparent_1px)] bg-[size:48px_48px] opacity-40" />
         {imageUrl ? (
           <motion.div
             initial={{ opacity: 0, scale: 0.97 }}
@@ -53,9 +84,9 @@ export default function ProductPreview({
             className="relative z-10 flex w-full max-w-3xl items-center justify-center"
           >
             <div className="relative inline-block max-w-full">
-              <img src={imageUrl} alt={view?.name} className="block max-h-[520px] max-w-full rounded-[28px] object-contain shadow-[0_28px_90px_rgba(2,6,23,0.55)]" />
+              <img src={imageUrl} alt={view?.name} className="block max-h-[320px] max-w-full rounded-[22px] object-contain shadow-[0_28px_90px_rgba(2,6,23,0.55)] sm:max-h-[520px] sm:rounded-[28px]" />
               {uploadedPreview && !result?.result_url && overlayFrameStyle && (
-                <div className="pointer-events-none absolute overflow-hidden" style={overlayFrameStyle}>
+                <div className="pointer-events-none absolute overflow-hidden rounded-[8px] ring-1 ring-sky-300/25" style={overlayFrameStyle}>
                   <img
                     src={uploadedPreview}
                     alt="Uploaded design"
@@ -73,6 +104,9 @@ export default function ProductPreview({
           </motion.div>
         ) : (
           <div className="relative z-10 rounded-3xl border border-dashed border-white/10 px-8 py-16 text-center text-slate-400">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/8 bg-slate-900/60 text-slate-300">
+              <ImageIcon size={22} />
+            </div>
             Product preview appears here once a view is selected.
           </div>
         )}
@@ -85,23 +119,22 @@ export default function ProductPreview({
         )}
       </div>
 
-      <div className="mt-6 grid gap-4 md:grid-cols-4">
-        <label className="rounded-3xl border border-white/5 bg-slate-900/40 p-4">
-          <span className="text-sm text-slate-400">Zoom</span>
-          <input type="range" min="0.5" max="2" step="0.05" value={controls.zoom} onChange={(e) => onZoomChange(Number(e.target.value))} className="mt-3 w-full accent-blue-500" />
-        </label>
-        <label className="rounded-3xl border border-white/5 bg-slate-900/40 p-4">
-          <span className="text-sm text-slate-400">Horizontal Position</span>
-          <input type="range" min="-180" max="180" step="1" value={controls.offsetX} onChange={(e) => onXChange(Number(e.target.value))} className="mt-3 w-full accent-blue-500" />
-        </label>
-        <label className="rounded-3xl border border-white/5 bg-slate-900/40 p-4">
-          <span className="text-sm text-slate-400">Vertical Position</span>
-          <input type="range" min="-180" max="180" step="1" value={controls.offsetY} onChange={(e) => onYChange(Number(e.target.value))} className="mt-3 w-full accent-blue-500" />
-        </label>
-        <label className="rounded-3xl border border-white/5 bg-slate-900/40 p-4">
-          <span className="text-sm text-slate-400">Print Size</span>
-          <input type="range" min="40" max="160" step="1" value={controls.printSize} onChange={(e) => onSizeChange(Number(e.target.value))} className="mt-3 w-full accent-blue-500" />
-        </label>
+      <div className="mt-5 grid grid-cols-2 gap-3 sm:mt-6 sm:gap-4 md:grid-cols-4">
+        {controlItems.map((item) => {
+          const Icon = item.icon;
+          return (
+            <label key={item.label} className="soft-card rounded-[22px] p-3 sm:rounded-3xl sm:p-4">
+              <div className="flex items-center justify-between gap-3">
+                <span className="flex items-center gap-2 text-sm text-slate-300">
+                  <Icon size={16} className="text-sky-300" />
+                  {item.label}
+                </span>
+                <span className="rounded-full border border-white/5 bg-slate-900/70 px-2.5 py-1 text-xs text-slate-400">{item.value}</span>
+              </div>
+              {item.input}
+            </label>
+          );
+        })}
       </div>
     </section>
   );

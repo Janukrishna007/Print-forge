@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { AlertCircle } from "lucide-react";
+import { Activity, AlertCircle, CheckCircle2, Download, Layers3, Shirt, Upload, WandSparkles } from "lucide-react";
 
 import LivePreviewPanel from "../components/LivePreviewPanel";
 import MaskAdjustPanel from "../components/MaskAdjustPanel";
@@ -29,12 +29,15 @@ export default function DashboardPage() {
   const combinedError = customizationError || error;
   const selectedViewWidth = selectedView?.image_width || 1200;
   const selectedViewHeight = selectedView?.image_height || 1200;
+  const hasProduct = Boolean(selectedProduct);
+  const hasView = Boolean(selectedView);
+  const hasUpload = Boolean(file);
 
   const stats = useMemo(
     () => [
-      { label: "Product Views", value: selectedProduct?.views?.length ?? 0 },
-      { label: "Render Progress", value: `${job?.progress ?? 0}%` },
-      { label: "Blend Mode", value: "Soft Light" },
+      { label: "Product Views", value: selectedProduct?.views?.length ?? 0, icon: Layers3 },
+      { label: "Render Progress", value: `${job?.progress ?? 0}%`, icon: Activity },
+      { label: "Render Mode", value: "Preview Safe", icon: WandSparkles },
     ],
     [selectedProduct, job],
   );
@@ -150,35 +153,94 @@ export default function DashboardPage() {
         }
       : selectedView;
   const activeResult = previewDirty ? null : result;
+  const hasRenderedResult = Boolean(activeResult?.result_url);
+  const mobileWorkflow = [
+    {
+      label: "Choose Product",
+      detail: hasProduct ? selectedProduct.name : "Pick a product from the catalog",
+      complete: hasProduct,
+      icon: Shirt,
+    },
+    {
+      label: "Upload Design",
+      detail: hasUpload ? file.name : "Add your artwork file",
+      complete: hasUpload,
+      icon: Upload,
+    },
+    {
+      label: "Download Result",
+      detail: hasRenderedResult ? "Final preview is ready" : "Render, then download the final mockup",
+      complete: hasRenderedResult,
+      icon: Download,
+    },
+  ];
 
   return (
-    <div className="h-screen overflow-hidden px-4 py-4 text-white md:px-6 lg:px-8">
-      <div className="mx-auto grid h-full max-w-[1680px] min-h-0 grid-cols-1 gap-4 xl:grid-cols-[320px_minmax(0,1fr)_380px]">
+    <div className="min-h-screen overflow-x-hidden px-3 py-3 text-white sm:px-4 sm:py-4 md:px-6 lg:px-8 xl:h-screen xl:overflow-hidden">
+      <section className="glass-panel mb-3 rounded-[24px] p-4 xl:hidden">
+        <div className="mb-4">
+          <p className="panel-eyebrow">Mobile Workflow</p>
+          <h2 className="mt-2 text-xl font-semibold text-slate-50">Follow these steps to get your final product fast.</h2>
+        </div>
+        <div className="space-y-3">
+          {mobileWorkflow.map((item, index) => {
+            const Icon = item.icon;
+            return (
+              <div key={item.label} className="soft-card rounded-[20px] p-3.5">
+                <div className="flex items-start gap-3">
+                  <div className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${item.complete ? "bg-emerald-500/15 text-emerald-300" : "bg-sky-500/12 text-sky-300"}`}>
+                    {item.complete ? <CheckCircle2 size={18} /> : <Icon size={18} />}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-slate-100">Step {index + 1}: {item.label}</p>
+                    <p className="mt-1 text-sm leading-5 text-slate-400">{item.detail}</p>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      <div className="mx-auto grid max-w-[1680px] grid-cols-1 gap-3 xl:h-full xl:min-h-0 xl:gap-4 xl:grid-cols-[320px_minmax(0,1fr)_380px]">
         <Sidebar products={products} selectedProduct={selectedProduct} onSelect={selectProduct} />
 
-        <main className="min-h-0 space-y-4 overflow-y-auto pr-1 scrollbar-thin">
+        <main className="space-y-3 overflow-visible pr-0 xl:min-h-0 xl:space-y-4 xl:overflow-y-auto xl:pr-1 xl:scrollbar-thin">
           <motion.section
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
-            className="glass-panel rounded-[32px] p-6"
+            className="glass-panel rounded-[28px] p-4 sm:rounded-[32px] sm:p-6"
           >
             <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
               <div>
-                <p className="text-sm uppercase tracking-[0.3em] text-slate-500">Customizer Workspace</p>
-                <h2 className="mt-2 text-4xl font-semibold text-slate-50">Premium product mockups, rendered asynchronously.</h2>
+                <div className="mb-3 flex items-center gap-2">
+                  <span className="panel-eyebrow">Customizer Workspace</span>
+                  <span className="status-pill rounded-full px-2.5 py-1 text-[11px]">Live</span>
+                </div>
+                <h2 className="mt-2 text-3xl font-semibold tracking-tight text-slate-50 sm:text-4xl">Build clean, production-ready product previews.</h2>
+                <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-400">
+                  Pick a synced garment image, upload artwork, adjust placement, and render the final output inside the same focused dashboard.
+                </p>
               </div>
               {selectedProduct?.views?.length ? (
                 <ViewTabs views={selectedProduct.views} selectedView={selectedView} onChange={setSelectedView} />
               ) : null}
             </div>
 
-            <div className="mt-5 grid gap-3 md:grid-cols-3">
-              {stats.map((item) => (
-                <div key={item.label} className="rounded-[24px] border border-white/5 bg-slate-900/35 p-4">
-                  <p className="text-sm text-slate-400">{item.label}</p>
-                  <p className="mt-2 text-2xl font-semibold text-slate-50">{item.value}</p>
-                </div>
-              ))}
+            <div className="mt-5 grid gap-3 sm:grid-cols-3">
+              {stats.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <div key={item.label} className="soft-card rounded-[24px] p-4">
+                    <div className="flex items-center gap-2 text-sm text-slate-400">
+                      <Icon size={16} className="text-sky-300" />
+                      <p>{item.label}</p>
+                    </div>
+                    <p className="mt-3 text-2xl font-semibold text-slate-50">{item.value}</p>
+                    <p className="mt-1 text-xs uppercase tracking-[0.22em] text-slate-500">Workspace status</p>
+                  </div>
+                );
+              })}
             </div>
 
             {combinedError && (
@@ -203,8 +265,9 @@ export default function DashboardPage() {
           />
         </main>
 
-        <div className="min-h-0 space-y-4 overflow-y-auto pr-1 scrollbar-thin">
-          <UploadPanel
+        <div className="flex flex-col gap-3 overflow-visible pr-0 xl:min-h-0 xl:gap-4 xl:overflow-y-auto xl:pr-1 xl:scrollbar-thin">
+          <div className="order-1">
+            <UploadPanel
             file={file}
             onFileChange={handleFileChange}
             onDrop={handleDrop}
@@ -212,8 +275,15 @@ export default function DashboardPage() {
             onSubmit={handleSubmit}
             disabled={!selectedProduct || !selectedView || !file || isRendering}
             job={job}
+            selectedProductName={selectedProduct?.name}
+            selectedViewName={selectedView?.name}
           />
-          <MaskAdjustPanel
+          </div>
+          <div className="order-2">
+            <LivePreviewPanel result={activeResult} error={combinedError} job={job} onDownload={handleDownload} />
+          </div>
+          <div className="order-3 xl:order-3">
+            <MaskAdjustPanel
             draftArea={mappingDraft}
             maxWidth={selectedViewWidth}
             maxHeight={selectedViewHeight}
@@ -222,7 +292,7 @@ export default function DashboardPage() {
             onReset={handleMaskReset}
             onSave={handleMaskSave}
           />
-          <LivePreviewPanel result={activeResult} error={combinedError} job={job} onDownload={handleDownload} />
+          </div>
         </div>
       </div>
 

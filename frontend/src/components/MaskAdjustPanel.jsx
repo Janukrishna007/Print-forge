@@ -1,4 +1,4 @@
-import { Crop, RotateCcw, Save } from "lucide-react";
+import { Crop, MoveDiagonal2, RotateCcw, Ruler, Save } from "lucide-react";
 
 const fields = [
   { key: "x", label: "Mask X", min: 0, step: 1 },
@@ -17,21 +17,25 @@ export default function MaskAdjustPanel({
   onSave,
 }) {
   return (
-    <section className="glass-panel rounded-[30px] p-5">
+    <section className="glass-panel rounded-[26px] p-4 sm:rounded-[30px] sm:p-5">
       <div className="mb-5 flex items-center justify-between">
         <div>
-          <p className="text-sm uppercase tracking-[0.28em] text-slate-500">Mask Adjustment</p>
+          <p className="panel-eyebrow">Placement Bounds</p>
           <h3 className="mt-2 text-2xl font-semibold text-slate-50">Print display area</h3>
         </div>
-        <div className="rounded-full border border-white/10 bg-slate-900/40 px-3 py-1 text-xs text-slate-300">
+        <div className="status-pill flex items-center gap-2 rounded-full px-3 py-1 text-xs">
+          <Ruler size={13} className="text-sky-300" />
           {maxWidth} x {maxHeight}
         </div>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-2 gap-3">
         {fields.map((field) => (
-          <label key={field.key} className="rounded-[24px] border border-white/5 bg-slate-900/35 p-4">
-            <span className="text-sm text-slate-400">{field.label}</span>
+          <label key={field.key} className="soft-card rounded-[22px] p-3 sm:rounded-[24px] sm:p-4">
+            <span className="flex items-center gap-2 text-sm text-slate-400">
+              <MoveDiagonal2 size={14} className="text-sky-300/75" />
+              {field.label}
+            </span>
             <input
               type="number"
               min={field.min}
@@ -39,20 +43,20 @@ export default function MaskAdjustPanel({
               step={field.step}
               value={draftArea[field.key]}
               onChange={(event) => onChange(field.key, Number(event.target.value))}
-              className="mt-3 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-slate-100 outline-none ring-0 transition focus:border-blue-400/40"
+              className="mt-3 w-full rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 text-slate-100 outline-none ring-0 transition focus:border-sky-400/40"
             />
           </label>
         ))}
       </div>
 
-      <div className="mt-4 rounded-[24px] border border-dashed border-blue-400/25 bg-blue-500/5 p-4 text-sm text-slate-300">
+      <div className="mt-4 rounded-[24px] border border-dashed border-sky-400/20 bg-sky-500/5 p-4 text-sm leading-6 text-slate-300">
         The blue overlay in preview follows this area. Saving also refreshes the perspective points to match the new mask bounds.
       </div>
 
-      <div className="mt-5 flex gap-3">
+      <div className="mt-5 flex flex-col gap-3 sm:flex-row">
         <button
           onClick={onReset}
-          className="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-white/10 bg-slate-900/40 px-4 py-3 text-sm font-medium text-slate-200 transition hover:bg-slate-800/70"
+          className="secondary-button flex flex-1 items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-medium text-slate-200 transition hover:bg-slate-800/70"
         >
           <RotateCcw size={18} />
           Reset
@@ -60,7 +64,7 @@ export default function MaskAdjustPanel({
         <button
           onClick={onSave}
           disabled={saving}
-          className="flex flex-[1.4] items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-500 to-violet-500 px-4 py-3 text-sm font-semibold text-white transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-50"
+          className="primary-button flex flex-[1.4] items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold text-white transition hover:translate-y-[-1px] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {saving ? <Crop size={18} /> : <Save size={18} />}
           {saving ? "Saving..." : "Save Mask Area"}
