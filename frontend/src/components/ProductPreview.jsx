@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { ImageIcon, Maximize2, MoveHorizontal, MoveVertical, ScanSearch, Sparkles } from "lucide-react";
 
@@ -13,10 +14,21 @@ export default function ProductPreview({
   onYChange,
   onSizeChange,
 }) {
-  const imageUrl = result?.result_url || view?.image_url;
   const area = view?.print_area;
   const imageWidth = view?.image_width || 1;
   const imageHeight = view?.image_height || 1;
+  const hasBaseProduct = Boolean(view?.image_url);
+  const hasPlacementPreview = Boolean(uploadedPreview && area && view?.image_url);
+  const hasRenderedPreview = Boolean(result?.result_url);
+  const previewModes = useMemo(
+    () => [
+      { key: "product", label: "Product", enabled: hasBaseProduct },
+      { key: "placement", label: "Placement", enabled: hasPlacementPreview },
+      { key: "rendered", label: "Rendered", enabled: hasRenderedPreview },
+    ],
+    [hasBaseProduct, hasPlacementPreview, hasRenderedPreview],
+  );
+  const [previewMode, setPreviewMode] = useState("product");
   const overlayFrameStyle =
     uploadedPreview && area
       ? {
@@ -24,8 +36,39 @@ export default function ProductPreview({
           top: `${(area.y / imageHeight) * 100}%`,
           width: `${(area.width / imageWidth) * 100}%`,
           height: `${(area.height / imageHeight) * 100}%`,
-        }
+      }
       : null;
+
+  useEffect(() => {
+    if (hasRenderedPreview) {
+      setPreviewMode("rendered");
+      return;
+    }
+    if (hasPlacementPreview) {
+      setPreviewMode("placement");
+      return;
+    }
+    setPreviewMode("product");
+  }, [hasRenderedPreview, hasPlacementPreview, view?.id, uploadedPreview]);
+
+  useEffect(() => {
+    const modeStillAvailable = previewModes.some((mode) => mode.key === previewMode && mode.enabled);
+    if (!modeStillAvailable) {
+      if (hasRenderedPreview) {
+        setPreviewMode("rendered");
+      } else if (hasPlacementPreview) {
+        setPreviewMode("placement");
+      } else {
+        setPreviewMode("product");
+      }
+    }
+  }, [previewMode, previewModes, hasRenderedPreview, hasPlacementPreview]);
+
+  const showOverlay = previewMode === "placement" && hasPlacementPreview && overlayFrameStyle;
+  const imageUrl =
+    previewMode === "rendered" && hasRenderedPreview
+      ? result?.result_url
+      : view?.image_url;
   const controlItems = [
     {
       label: "Zoom",
@@ -66,12 +109,33 @@ export default function ProductPreview({
             Fine-tune placement with live controls, then render the final mockup without leaving the workspace.
           </p>
         </div>
-        {isRendering && (
-          <div className="status-pill flex items-center gap-2 rounded-full px-4 py-2 text-sm text-sky-100">
-            <Sparkles size={15} className="text-sky-300" />
-            Rendering in progress
+        <div className="flex flex-col gap-3 sm:items-end">
+          <div className="grid w-full grid-cols-3 rounded-[20px] border border-white/10 bg-slate-950/55 p-1.5 sm:w-auto sm:min-w-[320px]">
+            {previewModes.map((mode) => (
+              <button
+                key={mode.key}
+                type="button"
+                onClick={() => mode.enabled && setPreviewMode(mode.key)}
+                disabled={!mode.enabled}
+                className={`rounded-[14px] px-3 py-2 text-xs font-semibold transition sm:text-sm ${
+                  previewMode === mode.key && mode.enabled
+                    ? "bg-gradient-to-r from-sky-500 via-blue-500 to-blue-700 text-white"
+                    : mode.enabled
+                      ? "text-slate-300 hover:bg-white/5"
+                      : "cursor-not-allowed text-slate-600"
+                }`}
+              >
+                {mode.label}
+              </button>
+            ))}
           </div>
-        )}
+          {isRendering && (
+            <div className="status-pill flex items-center gap-2 rounded-full px-4 py-2 text-sm text-sky-100">
+              <Sparkles size={15} className="text-sky-300" />
+              Rendering in progress
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="relative flex flex-1 items-center justify-center overflow-hidden rounded-[24px] border border-white/5 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.16),_transparent_28%),linear-gradient(180deg,_rgba(8,15,29,0.98),_rgba(3,8,20,0.98))] p-4 sm:rounded-[28px] sm:p-8">
@@ -85,7 +149,7 @@ export default function ProductPreview({
           >
             <div className="relative inline-block max-w-full">
               <img src={imageUrl} alt={view?.name} className="block max-h-[320px] max-w-full rounded-[22px] object-contain shadow-[0_28px_90px_rgba(2,6,23,0.55)] sm:max-h-[520px] sm:rounded-[28px]" />
-              {uploadedPreview && !result?.result_url && overlayFrameStyle && (
+              {showOverlay && (
                 <div className="pointer-events-none absolute overflow-hidden rounded-[8px] ring-1 ring-sky-300/25" style={overlayFrameStyle}>
                   <img
                     src={uploadedPreview}
