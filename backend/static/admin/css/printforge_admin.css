@@ -1,0 +1,28 @@
+.printforge-admin-preview {
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.92), rgba(30, 41, 59, 0.92));
+  border: 1px solid rgba(59, 130, 246, 0.22);
+  border-radius: 18px;
+  max-width: 840px;
+  padding: 16px;
+}
+
+.printforge-admin-stage {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #020617;
+}
+
+.printforge-admin-stage img,
+.printforge-admin-stage canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.printforge-admin-stage canvas {
+  inset: 0;
+  position: absolute;
+  pointer-events: auto;
+  cursor: crosshair;
+}

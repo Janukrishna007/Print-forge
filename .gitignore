@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+backend/.venv/
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Django
+backend/staticfiles/
+backend/db.sqlite3
+
+# Environment
+.env
+backend/.env
+frontend/.env
+
+# Media generated during testing
+media/uploads/*
+media/results/*
+!media/uploads/.gitkeep
+!media/results/.gitkeep
