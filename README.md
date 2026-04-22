@@ -1,6 +1,6 @@
 # PrintForge
 
-PrintForge is a standalone full-stack product customization application built for production-style internship evaluation. It has no dependency on any older project and lives entirely inside this folder with its own backend, frontend, Docker stack, media directories, sample data, and tests.
+PrintForge is a standalone full-stack product customization application.
 
 ## Stack
 
